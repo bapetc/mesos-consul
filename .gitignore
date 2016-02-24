@@ -1,6 +1,6 @@
 .vagrant/
 *.swp
 
-mesos-consul
+mesos-consul.iml
 build/
 .idea/

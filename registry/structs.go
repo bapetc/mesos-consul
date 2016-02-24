@@ -13,6 +13,7 @@ type Service struct {
 	Port    int
 	Address string
 	Tags    []string
+    Labels  map[string]string
 	Check   *Check
 	Agent   string
 }
