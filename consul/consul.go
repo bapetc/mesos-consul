@@ -125,6 +125,22 @@ func (c *Consul) Register(service *registry.Service) {
 		return
 	}
 
+	if len(service.Labels) > 0 {
+       for k, v := range service.Labels {
+
+            // Write the KV update
+    	    kvPair := consulapi.KVPair{
+    		    Key:   "services" + service.Name + "/hypergate" + k,
+    		    Value: []byte(v),
+    	    }
+
+    	    if _, err := c.agents[service.Agent].KV().Put(&kvPair, nil); err != nil {
+    		    log.Warnf("failed to write '%s': %v", k, err.Error())
+    		    return
+    	    }
+        }
+    }
+
 	serviceCache[s.ID] = newCacheEntry(s, service.Agent)
 	c.CacheMark(s.ID)
 }

@@ -117,6 +117,7 @@ func (m *Mesos) registerHost(s *registry.Service) {
 
 func (m *Mesos) registerTask(t *state.Task, agent string) {
 	var tags []string
+	myMap := make(map[string]string)
 
 	tname := cleanName(t.Name, m.Separator)
 	if m.whitelistRegex != nil {
@@ -134,6 +135,19 @@ func (m *Mesos) registerTask(t *state.Task, agent string) {
 		tags = strings.Split(t.Label("tags"), ",")
 	} else {
 		tags = []string{}
+        labels := t.Labels
+        for index := range labels {
+              key := labels[index].Key
+              value := labels[index].Value
+              if !strings.EqualFold(key, "tags") {
+                p := strings.Split(key, ":")
+                var newKey string
+                for i := range p {
+                    newKey += "/" + p[i]
+                }
+                myMap[newKey] = value
+              }
+         }
 	}
 
 	for key := range t.DiscoveryInfo.Ports.DiscoveryPorts {
@@ -155,6 +169,7 @@ func (m *Mesos) registerTask(t *state.Task, agent string) {
 					Host: toIP(address),
 					Port: servicePort,
 				}),
+				Labels: myMap,
 				Agent: toIP(agent),
 			})
 		}
@@ -172,6 +187,7 @@ func (m *Mesos) registerTask(t *state.Task, agent string) {
 					Host: toIP(address),
 					Port: port,
 				}),
+				Labels: myMap,
 				Agent: toIP(agent),
 			})
 		}
@@ -184,6 +200,7 @@ func (m *Mesos) registerTask(t *state.Task, agent string) {
 			Check: GetCheck(t, &CheckVar{
 				Host: toIP(address),
 			}),
+			Labels: myMap,
 			Agent: toIP(agent),
 		})
 	}
